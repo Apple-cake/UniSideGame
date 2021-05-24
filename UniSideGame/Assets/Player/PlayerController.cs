@@ -19,10 +19,25 @@ public class PlayerController : MonoBehaviour
     // 地上判定
     bool onGround = false;
 
+    // アニメーション対応
+    Animator animator;
+    public string stopAnime = "PlayerStop";
+    public string moveAnime = "PlayerMove";
+    public string jumpAnime = "PlayerJump";
+    public string goalAnime = "PlayerGoal";
+    public string deadAnime = "PlayerOver";
+    string nowAnime = "";
+    string oldAnime = "";
+
     // Start is called before the first frame update
     void Start()
     {
+        // Rigid2Dを取得
         rbody = this.GetComponent<Rigidbody2D>();
+        // Animatorを取得
+        animator = GetComponent<Animator>();
+        nowAnime = stopAnime;
+        oldAnime = stopAnime;
     }
 
     // Update is called once per frame
@@ -70,6 +85,31 @@ public class PlayerController : MonoBehaviour
             // ジャンプ開始フラグ false(= ジャンプ終了)
             goJump = false;
         }
+        if (onGround)
+        {
+            // 地上で速度0の場合、停止アニメーション
+            if (axisH == 0)
+            {
+                nowAnime = stopAnime;
+            }
+            // 地上で移動中の場合、移動アニメーション
+            else
+            {
+                nowAnime = moveAnime;
+            }
+        }
+        else
+        {
+            // 空中の場合、ジャンプアニメーション
+            nowAnime = jumpAnime;
+        }
+
+        // アニメーションの変更があった場合、アニメーション再生を更新
+        if (nowAnime != oldAnime)
+        {
+            oldAnime = nowAnime;
+            animator.Play(nowAnime);
+        }
     }
 
     public void Jump()
@@ -77,5 +117,30 @@ public class PlayerController : MonoBehaviour
         // ジャンプ開始フラグ true
         goJump = true;
         Debug.Log("ジャンプ開始");
+    }
+
+    // 接触開始
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Goal")
+        {
+            Goal(); // ゴール
+        }
+        else if (collision.gameObject.tag == "Dead")
+        {
+            GameOver(); // ゲームオーバー
+        }
+    }
+
+    // ゴール
+    public void Goal()
+    {
+        animator.Play(goalAnime);
+    }
+
+    // ゲームオーバー
+    public void GameOver()
+    {
+        animator.Play(deadAnime);
     }
 }
