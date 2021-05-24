@@ -29,6 +29,9 @@ public class PlayerController : MonoBehaviour
     string nowAnime = "";
     string oldAnime = "";
 
+    // ゲームの状態
+    public static string gameState = "playing";
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,11 +41,18 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         nowAnime = stopAnime;
         oldAnime = stopAnime;
+        // 開始時、ゲーム中にする
+        gameState = "playing";
     }
 
     // Update is called once per frame
     void Update()
     {
+        // ゲーム中ではない場合、処理中断
+        if (gameState != "playing")
+        {
+            return;
+        }
         // 水平方向のキー入力を取得
         axisH = Input.GetAxisRaw("Horizontal");
         // プレイヤーの向きをキー入力に合わせる
@@ -67,6 +77,11 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // ゲーム中ではない場合、処理中断
+        if (gameState != "playing")
+        {
+            return;
+        }
         // 地上判定
         onGround = Physics2D.Linecast(transform.position, transform.position - (transform.up * 0.1f), groundLayer);
         // 地上 or プレイヤーの速度が0ではない
@@ -122,13 +137,15 @@ public class PlayerController : MonoBehaviour
     // 接触開始
     void OnTriggerEnter2D(Collider2D collision)
     {
+        // ゴール
         if (collision.gameObject.tag == "Goal")
         {
-            Goal(); // ゴール
+            Goal();
         }
+        // ゲームオーバー
         else if (collision.gameObject.tag == "Dead")
         {
-            GameOver(); // ゲームオーバー
+            GameOver();
         }
     }
 
@@ -136,11 +153,35 @@ public class PlayerController : MonoBehaviour
     public void Goal()
     {
         animator.Play(goalAnime);
+        // ゲームクリアにする
+        gameState = "gameclear";
+        // ゲーム停止
+        GameStop();
     }
 
     // ゲームオーバー
     public void GameOver()
     {
         animator.Play(deadAnime);
+        // ゲームオーバーにする
+        gameState = "gameover";
+        // ゲーム停止
+        GameStop();
+        // ================
+        // ゲームオーバー演出
+        // ================
+        // プレイヤーのアタリを消す
+        GetComponent<CapsuleCollider2D>().enabled = false;
+        // プレイヤーを上に少し跳ね上げる演出
+        rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse);
+    }
+
+    //
+    void GameStop()
+    {
+        // Rigidbody2Dを取得
+        Rigidbody2D rbody = GetComponent<Rigidbody2D>();
+        // 速度を0にして強制停止
+        rbody.velocity = new Vector2(0, 0);
     }
 }
