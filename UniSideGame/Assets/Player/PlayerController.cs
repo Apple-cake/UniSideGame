@@ -155,8 +155,14 @@ public class PlayerController : MonoBehaviour
         animator.Play(goalAnime);
         // ゲームクリアにする
         gameState = "gameclear";
+        Invoke("StopAnimator", 3.0f);
         // ゲーム停止
         GameStop();
+    }
+
+    public void StopAnimator()
+    {
+        animator.Play(stopAnime);
     }
 
     // ゲームオーバー
@@ -176,7 +182,7 @@ public class PlayerController : MonoBehaviour
         rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse);
     }
 
-    //
+    // ゲーム停止
     void GameStop()
     {
         // Rigidbody2Dを取得
