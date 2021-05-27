@@ -68,8 +68,6 @@ public class GameManager : MonoBehaviour
     // 画像を非表示にする
     void InactiveImage()
     {
-        mainImage.GetComponent<Image>().sprite = gameStartSpr;
-        
-        // mainImage.SetActive(false);
+        mainImage.SetActive(false);
     }
 }
