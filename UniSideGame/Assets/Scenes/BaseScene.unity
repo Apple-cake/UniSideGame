@@ -363,6 +363,10 @@ MonoBehaviour:
   topLimit: 1
   bottomLimit: 0
   subScreen: {fileID: 1584073592}
+  isForceScrollX: 1
+  forceScrollSpeedX: 0.5
+  isForceScrollY: 0
+  forceScrollSpeedY: 0.5
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
