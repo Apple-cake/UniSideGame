@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     bool goJump = false;
     // 地上判定
     bool onGround = false;
+    // スコア
+    public int score = 0;
 
     // アニメーション対応
     Animator animator;
@@ -146,6 +148,16 @@ public class PlayerController : MonoBehaviour
         else if (collision.gameObject.tag == "Dead")
         {
             GameOver();
+        }
+        // スコアアイテム獲得
+        else if (collision.gameObject.tag == "ScoreItem")
+        {
+            // アイテム
+            ItemData item = collision.gameObject.GetComponent<ItemData>();
+            // アイテムのスコア
+            score = item.value;
+            // アイテムの削除
+            Destroy(collision.gameObject);
         }
     }
 

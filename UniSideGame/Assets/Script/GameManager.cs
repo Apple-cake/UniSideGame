@@ -20,6 +20,14 @@ public class GameManager : MonoBehaviour
     // NEXTボタン
     public GameObject nextButton;
 
+    // スコア追加
+    // スコアテキスト
+    public GameObject scoreText;
+    // 合計スコア
+    public static int totalScore;
+    // ステージスコア
+    public int stageScore;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +35,8 @@ public class GameManager : MonoBehaviour
         Invoke("InactiveImage", 1.0f);
         // パネルを非表示にする
         panel.SetActive(false);
+        // スコア追加
+        UpdateScore();
     }
 
     // Update is called once per frame
@@ -45,6 +55,10 @@ public class GameManager : MonoBehaviour
             // 画像を設定する
             mainImage.GetComponent<Image>().sprite = gameClearSpr;
             PlayerController.gameState = "gameend";
+            // スコア追加
+            totalScore += stageScore;
+            stageScore = 0;
+            UpdateScore();
         }
         // ゲームオーバー
         else if (PlayerController.gameState == "gameover")
@@ -62,12 +76,31 @@ public class GameManager : MonoBehaviour
         }
         // ゲーム中
         else if (PlayerController.gameState == "playing")
-        {}
+        {
+            // プレイヤーオブジェクトを取得
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            // PlayerControllerを取得
+            PlayerController playerCnt = player.GetComponent<PlayerController>();
+            // スコア追加
+            if (playerCnt.score != 0)
+            {
+                stageScore += playerCnt.score;
+                playerCnt.score = 0;
+                UpdateScore();
+            }
+        }
     }
 
     // 画像を非表示にする
     void InactiveImage()
     {
         mainImage.SetActive(false);
+    }
+
+    // スコア追加
+    void UpdateScore()
+    {
+        int score = stageScore + totalScore;
+        scoreText.GetComponent<Text>().text = score.ToString();
     }
 }
