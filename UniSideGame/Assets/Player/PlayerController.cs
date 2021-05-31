@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     // 水平方向の入力
     float axisH = 0.0f;
     // 移動速度
-    public float speed = 3.0f;
+    public float speed = 4.0f;
     // ジャンプ力
     public float jump = 9.0f;
     // 着地レイヤー
