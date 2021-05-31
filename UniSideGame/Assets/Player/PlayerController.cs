@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     // 水平方向の入力
     float axisH = 0.0f;
     // 移動速度
-    public float speed = 3.0f;
+    public float speed = 4.0f;
     // ジャンプ力
     public float jump = 9.0f;
     // 着地レイヤー
@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     bool goJump = false;
     // 地上判定
     bool onGround = false;
+    // スコア
+    public int score = 0;
 
     // アニメーション対応
     Animator animator;
@@ -147,6 +149,16 @@ public class PlayerController : MonoBehaviour
         {
             GameOver();
         }
+        // スコアアイテム獲得
+        else if (collision.gameObject.tag == "ScoreItem")
+        {
+            // アイテム
+            ItemData item = collision.gameObject.GetComponent<ItemData>();
+            // アイテムのスコア
+            score = item.value;
+            // アイテムの削除
+            Destroy(collision.gameObject);
+        }
     }
 
     // ゴール
@@ -155,8 +167,14 @@ public class PlayerController : MonoBehaviour
         animator.Play(goalAnime);
         // ゲームクリアにする
         gameState = "gameclear";
+        Invoke("StopAnimator", 3.0f);
         // ゲーム停止
         GameStop();
+    }
+
+    public void StopAnimator()
+    {
+        animator.Play(stopAnime);
     }
 
     // ゲームオーバー
@@ -176,7 +194,7 @@ public class PlayerController : MonoBehaviour
         rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse);
     }
 
-    //
+    // ゲーム停止
     void GameStop()
     {
         // Rigidbody2Dを取得
