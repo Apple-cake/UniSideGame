@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     // 水平方向の入力
     float axisH = 0.0f;
     // 移動速度
-    public float speed = 3.0f;
+    public float speed = 8.0f;
     // ジャンプ力
     public float jump = 9.0f;
     // 着地レイヤー
@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     bool goJump = false;
     // 地上判定
     bool onGround = false;
+    // スコア
+    public int score = 0;
 
     // アニメーション対応
     Animator animator;
@@ -30,7 +32,7 @@ public class PlayerController : MonoBehaviour
     string oldAnime = "";
 
     // ゲームの状態
-    public static string gameState = "playing";
+    public static string gameState = "stop";
 
     // Start is called before the first frame update
     void Start()
@@ -41,12 +43,26 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         nowAnime = stopAnime;
         oldAnime = stopAnime;
-        // 開始時、ゲーム中にする
-        gameState = "playing";
+        // 開始演出後に、ゲーム中にする
+        Invoke("PlayStart", 1.0f);
     }
 
     // Update is called once per frame
     void Update()
+    {
+        // ゲーム中ではない場合、処理中断
+        if (gameState != "playing")
+        {
+            return;
+        }
+        // キャラクターをジャンプさせる
+        if (Input.GetButtonDown("Jump"))
+        {
+            Jump();
+        }
+    }
+
+    void FixedUpdate()
     {
         // ゲーム中ではない場合、処理中断
         if (gameState != "playing")
@@ -68,28 +84,11 @@ public class PlayerController : MonoBehaviour
             Debug.Log("左移動開始");
             transform.localScale = new Vector2(-1, 1);
         }
-        // キャラクターをジャンプさせる
-        if (Input.GetButtonDown("Jump"))
-        {
-            Jump();
-        }
-    }
-
-    void FixedUpdate()
-    {
-        // ゲーム中ではない場合、処理中断
-        if (gameState != "playing")
-        {
-            return;
-        }
         // 地上判定
         onGround = Physics2D.Linecast(transform.position, transform.position - (transform.up * 0.1f), groundLayer);
         // 地上 or プレイヤーの速度が0ではない
-        if (onGround || axisH != 0)
-        {
-            // プレイヤーの速度を更新
-            rbody.velocity = new Vector2(speed * axisH, rbody.velocity.y);
-        }
+        // プレイヤーの速度を更新
+        rbody.velocity = new Vector2(speed, rbody.velocity.y);
         // 地上 and ジャンプキーが押された
         if (onGround && goJump)
         {
@@ -102,13 +101,8 @@ public class PlayerController : MonoBehaviour
         }
         if (onGround)
         {
-            // 地上で速度0の場合、停止アニメーション
-            if (axisH == 0)
-            {
-                nowAnime = stopAnime;
-            }
-            // 地上で移動中の場合、移動アニメーション
-            else
+            // 地上でゲーム中の場合、移動アニメーション
+            if (gameState == "playing")
             {
                 nowAnime = moveAnime;
             }
@@ -125,6 +119,11 @@ public class PlayerController : MonoBehaviour
             oldAnime = nowAnime;
             animator.Play(nowAnime);
         }
+    }
+
+    public void PlayStart()
+    {
+        gameState = "playing";
     }
 
     public void Jump()
@@ -147,6 +146,16 @@ public class PlayerController : MonoBehaviour
         {
             GameOver();
         }
+        // スコアアイテム獲得
+        else if (collision.gameObject.tag == "ScoreItem")
+        {
+            // アイテム
+            ItemData item = collision.gameObject.GetComponent<ItemData>();
+            // アイテムのスコア
+            score = item.value;
+            // アイテムの削除
+            Destroy(collision.gameObject);
+        }
     }
 
     // ゴール
@@ -155,8 +164,14 @@ public class PlayerController : MonoBehaviour
         animator.Play(goalAnime);
         // ゲームクリアにする
         gameState = "gameclear";
+        Invoke("StopAnimator", 3.0f);
         // ゲーム停止
         GameStop();
+    }
+
+    public void StopAnimator()
+    {
+        animator.Play(stopAnime);
     }
 
     // ゲームオーバー
@@ -176,7 +191,7 @@ public class PlayerController : MonoBehaviour
         rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse);
     }
 
-    //
+    // ゲーム停止
     void GameStop()
     {
         // Rigidbody2Dを取得
