@@ -12,13 +12,14 @@ public class CannonController : MonoBehaviour
     public float fireSpeedX = -4.0f;
     // Y方向の発射速度
     public float fireSpeedY = 0.0f;
+    public float length = 8.0f;
 
     // プレイヤー
     GameObject player;
     // 発射口
     GameObject gateObj;
     // 経過時間
-    float passTimes = 0;
+    float passedTimes = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,6 +33,30 @@ public class CannonController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // 発射時間判定
+        passedTimes += Time.deltaTime;
+        // 距離チェック
+        if (CheckLength(player.transform.position))
+        {
+            if (passedTimes > delayTime)
+            {
+                // 発射
+                passedTimes = 0;
+            }
+        }
+    }
+
+    // 距離チェック
+    bool CheckLength(Vector2 targetPos)
+    {
+        bool ret = false;
+        // 発射口とプレイヤーの距離を計測
+        float d = Vector2.Distance(transform.position, targetPos);
+        // 指定の距離以下になった場合に発射
+        if (length >= d)
+        {
+            ret = true;
+        }
+        return ret;
     }
 }
